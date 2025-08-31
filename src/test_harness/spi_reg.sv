@@ -144,6 +144,10 @@ module spi_reg #(
     endcase
   end
 
+  // Data valid strobe
+  logic dv;
+  logic last_dv;
+
   // Transaction buffer
   logic [REG_W-1:0] txn_buffer;
 
@@ -155,7 +159,9 @@ module spi_reg #(
       if (ena == 1'b1) begin
         case (state)
           STATE_IDLE : begin
-            txn_buffer <= '0;
+            if (dv) txn_buffer[3:0] <= '0;
+            else if (last_dv) txn_buffer[7:0] <= '0;
+            else txn_buffer <= '0;
           end
           STATE_TX_LOAD : begin
             txn_buffer <= reg_data_i;
@@ -214,9 +220,6 @@ module spi_reg #(
   assign reg_addr = addr;
   assign reg_addr_v = tx_buffer_load;
 
-  // Data valid strobe
-  logic dv;
-
   // RX buffer can be directly assigned to the data output.  
   // Previously this re-sampled but that cost 32 flops.
   // DV is only indicated at the end of the SPI transaction and txn_buffer will be stable, 
@@ -228,7 +231,9 @@ module spi_reg #(
   always_ff @(negedge(rstb) or posedge(clk)) begin
     if (!rstb) begin
       dv <= '0;
+      last_dv <= '0;
     end else begin
+      last_dv <= dv;
       if (ena == 1'b1) begin
         dv <= '0;
         if (sample_data == 1'b1) begin
