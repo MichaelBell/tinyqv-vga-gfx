@@ -145,8 +145,8 @@ module tqvp_rebelmike_vga_gfx (
     assign data_ready = 1'b1;
     assign data_out = (address[1:0] == 2'b00) ? pixel_data[address[5:2]] :
                       (address == 6'h1) ? {26'h0, interrupt_x_offset, interrupt_y_mask} :
-                      (address == 6'h2) ? {18'h0, vga_y_hi, 3'h0, vga_y_lo} :
-                      (address == 6'h3) ? {26'h0, vga_y_hi} :
+                      (address == 6'h2) ? {19'h0, vga_y_hi, 2'h0, vga_y_lo} :
+                      (address == 6'h3) ? {27'h0, vga_y_hi} :
                       (address == 6'h5) ? {26'h0, colour[1]} :
                       (address == 6'h6) ? {26'h0, colour[2]} :
                       (address == 6'h7) ? {26'h0, colour[3]} :
